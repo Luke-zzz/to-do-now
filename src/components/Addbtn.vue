@@ -28,7 +28,7 @@
 import { defineComponent, ref } from "vue";
 import {NCard,NSpace,NButton,NIcon,NDynamicInput,NDrawerContent,NDrawer} from 'naive-ui'
 import { nanoid } from "nanoid";
-
+import { useStore } from 'vuex'
 export default {
     name:'Addbtn',
     emits:['addTodo'],
@@ -36,6 +36,7 @@ export default {
         NCard,NSpace,NButton,NIcon,NDynamicInput,NDrawerContent,NDrawer
     },
     setup(props,ctx) {
+    const store = useStore()
     const title=ref()
     const active = ref(false);
     const placement = ref("right");
@@ -54,7 +55,7 @@ export default {
             title: title.value,
             complete:false
         }
-        ctx.emit("addTodo",todoObj);
+        store.commit("addTodo",todoObj);
         title.value = '';
     }
     return {

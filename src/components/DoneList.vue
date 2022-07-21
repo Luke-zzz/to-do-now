@@ -33,40 +33,40 @@
 </template>
 
 <script>
-import { reactive,watch,ref,computed,onMounted,nextTick } from 'vue'
-import { nanoid } from 'nanoid'
+import { watch,computed } from 'vue'
 import draggable from 'vuedraggable'
-import {NCard,NSpace,NButton,NIcon} from 'naive-ui'
+import { useStore } from 'vuex'
+import {NIcon} from 'naive-ui'
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
-
 
 
 export default {
     name:'TodoList',
     components:{draggable,NIcon,Swiper,
       SwiperSlide},
-    props:['alllist','donelist','updateAllTodo','checkTodo','updateTodo'],
-    setup(props,ctx){
-      
+    setup(props,ctx){   
+      const store = useStore()
       let todos=computed({
         get:()=>{
-          return props.donelist
+          return store.state.todos.filter((todo)=>todo.complete==true)
         },
         set:(parm)=>{
-          ctx.emit('updateAllTodo',parm)
+          store.commit('updateAllTodo',parm)
         }
       })
       const onSlideChange = (swiper) =>{
         if(swiper.isEnd){
-          let newtodos=props.alllist.filter(todo => todo.id !== swiper.el.id)
-          ctx.emit('updateAllTodo',newtodos)
+          let newtodos=store.state.todos.filter(todo => todo.id !== swiper.el.id)
+          store.commit('updateAllTodo',newtodos)
         }
         if(swiper.isBeginning){
-          ctx.emit('checkTodo',swiper.el.id)
+          store.commit('checkTodo',swiper.el.id)
         }
       }
-
+      watch(store.state.todos,(newValue)=>{
+          localStorage.setItem('todos', JSON.stringify(newValue))
+      },{deep:true})
       return{
         todos,
         onSlideChange,

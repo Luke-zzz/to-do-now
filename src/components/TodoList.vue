@@ -41,10 +41,10 @@
 </template>
 
 <script>
-import { reactive,watch,ref,computed,onMounted,nextTick } from 'vue'
-import { nanoid } from 'nanoid'
+import { watch,ref,computed,nextTick } from 'vue'
+import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
-import {NCard,NSpace,NButton,NIcon} from 'naive-ui'
+import {NIcon} from 'naive-ui'
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 
@@ -54,16 +54,15 @@ export default {
     name:'TodoList',
     components:{draggable,NIcon,Swiper,
       SwiperSlide},
-    props:['todolist','updateAllTodo','checkTodo','updateTodo'],
     setup(props,ctx){
-      
+      const store = useStore()
       let inputTitle=ref(null);
       let todos=computed({
         get:()=>{
-          return props.todolist
+          return store.state.todos.filter((todo)=>todo.complete==false)
         },
         set:(parm)=>{
-          ctx.emit('updateAllTodo',parm)
+          store.commit('updateAllTodo',parm)
         }
       })
       todos.value.forEach(todo => {
@@ -72,10 +71,10 @@ export default {
       const onSlideChange = (swiper) =>{
         if(swiper.isEnd){
           let newtodos=todos.value.filter(todo => todo.id !== swiper.el.id)
-          ctx.emit('updateAllTodo',newtodos)
+          store.commit('updateAllTodo',newtodos)
         }
         if(swiper.isBeginning){
-          ctx.emit('checkTodo',swiper.el.id)
+          store.commit('checkTodo',swiper.el.id)
         }
       }
       function changetodo(id){
@@ -86,14 +85,20 @@ export default {
           inputTitle.value.focus()
         })
       }
-      function handleBlur(todo, e){
-        todo.edit = false;
+      function handleBlur(todo,e){
         if(!e.target.value.trim()) {
-        alert('输入不能为空');
-        return;
+          alert('输入不能为空');
+          return;
+        }
+        store.commit('updateTodo',{
+          id:todo.id,
+          title:e.target.value
+        })
+        todo.edit = false;
       }
-        ctx.emit('updateTodo',todo.id,e.target.value)
-      }
+      watch(store.state.todos,(newValue)=>{
+          localStorage.setItem('todos', JSON.stringify(newValue))
+      },{deep:true})
       return{
         todos,
         onSlideChange,
