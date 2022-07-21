@@ -4,7 +4,6 @@
     item-key="id" 
     class="todolist" 
     animation="500"
-    @start="start"
     handle=".handle"
     chosenClass="chosen"
     >
@@ -56,12 +55,6 @@ export default {
     components:{draggable,NIcon,Swiper,
       SwiperSlide},
     props:['todolist','updateAllTodo','checkTodo','updateTodo'],
-    methods: {
-      //开始拖拽事件
-      start(e) {
-        console.log(e,this.drag);
-      } 
-    },
     setup(props,ctx){
       
       let inputTitle=ref(null);
